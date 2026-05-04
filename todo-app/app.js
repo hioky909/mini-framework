@@ -57,8 +57,10 @@ function reducer(state, action) {
         todos: [...state.todos, { id: Date.now(), text: action.payload, completed: false }],
       };
 
-    case 'DELETE_TODO':
-      return { ...state, todos: state.todos.filter((t) => t.id !== action.payload) };
+    case 'DELETE_TODO': {
+      const todos = state.todos.filter((t) => t.id !== action.payload);
+      return todos.length === state.todos.length ? state : { ...state, todos };
+    }
 
     case 'TOGGLE_TODO':
       return {
@@ -69,6 +71,10 @@ function reducer(state, action) {
       };
 
     case 'TOGGLE_ALL': {
+      if (state.todos.length === 0) {
+        return state;
+      }
+
       const allDone = state.todos.every((t) => t.completed);
       return {
         ...state,
@@ -95,10 +101,13 @@ function reducer(state, action) {
     case 'CANCEL_EDIT':
       return { ...state, editingId: null };
 
-    case 'CLEAR_COMPLETED':
-      return { ...state, todos: state.todos.filter((t) => !t.completed) };
+    case 'CLEAR_COMPLETED': {
+      const todos = state.todos.filter((t) => !t.completed);
+      return todos.length === state.todos.length ? state : { ...state, todos };
+    }
 
     case 'SET_FILTER':
+      if (state.filter === action.payload) return state;
       return { ...state, filter: action.payload };
 
     default:
@@ -153,10 +162,24 @@ function filterTodos(todos, filter) {
   }
 }
 
+function summarizeTodos(todos) {
+  let activeCount = 0;
+  let completedCount = 0;
+
+  for (const todo of todos) {
+    if (todo.completed) {
+      completedCount++;
+    } else {
+      activeCount++;
+    }
+  }
+
+  return { activeCount, completedCount };
+}
+
 function AppView(state) {
-  const visibleTodos  = filterTodos(state.todos, state.filter);
-  const activeCount   = state.todos.filter((t) => !t.completed).length;
-  const completedCount = state.todos.filter((t) =>  t.completed).length;
+  const visibleTodos = filterTodos(state.todos, state.filter);
+  const { activeCount, completedCount } = summarizeTodos(state.todos);
 
   return h('section', { class: 'todoapp' },
     TodoHeader({ onAdd: actions.addTodo }),

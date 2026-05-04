@@ -34,17 +34,25 @@ export function TodoItem({ todo, editing, onToggle, onDelete, onStartEdit, onSav
     editing        ? 'editing'   : '',
   ].filter(Boolean).join(' ');
 
+  let ignoreNextBlur = false;
+
   function handleEditKeydown(e) {
     if (e.key === 'Enter') {
+      ignoreNextBlur = true;
       onSaveEdit(todo.id, e.target.value);
     } else if (e.key === 'Escape') {
+      ignoreNextBlur = true;
       onCancelEdit();
     }
   }
 
   function handleEditBlur(e) {
-    // Only save if we're still in editing mode (Escape sets editing=false
-    // before the blur fires, so we guard against saving a cancelled edit).
+    if (ignoreNextBlur) {
+      ignoreNextBlur = false;
+      return;
+    }
+
+    // Saving on blur keeps keyboard and mouse interactions aligned.
     onSaveEdit(todo.id, e.target.value);
   }
 
