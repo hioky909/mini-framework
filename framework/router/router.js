@@ -46,6 +46,9 @@ export class Router {
    * @returns {Router} this – for chaining
    */
   on(path, handler) {
+    if (typeof handler !== 'function') {
+      throw new TypeError(`Route handler for "${path}" must be a function`);
+    }
     this._routes.set(path, handler);
     return this;
   }
@@ -57,6 +60,9 @@ export class Router {
    * @returns {Router} this
    */
   notFound(handler) {
+    if (typeof handler !== 'function') {
+      throw new TypeError('notFound handler must be a function');
+    }
     this._notFoundHandler = handler;
     return this;
   }
@@ -72,6 +78,9 @@ export class Router {
    * @returns {Function} unsubscribe
    */
   onChange(listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('Route change listener must be a function');
+    }
     this._changeListeners.push(listener);
     return () => {
       this._changeListeners = this._changeListeners.filter((l) => l !== listener);
@@ -110,10 +119,12 @@ export class Router {
     const path = this.getCurrentPath();
     const handler = this._routes.get(path) ?? this._notFoundHandler;
 
-    if (handler) {
+    if (typeof handler === 'function') {
       handler(path);
     }
 
-    this._changeListeners.forEach((fn) => fn(path));
+    this._changeListeners.forEach((fn) => {
+      if (typeof fn === 'function') fn(path);
+    });
   }
 }
