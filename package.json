@@ -1,0 +1,14 @@
+{
+  "name": "mini-framework",
+  "version": "1.0.0",
+  "description": "A lightweight, zero-dependency JavaScript frontend framework with a TodoMVC demo",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run.js",
+    "serve": "npx serve ."
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "playwright": "^1.59.1"
+  }
+}
